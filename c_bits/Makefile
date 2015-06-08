@@ -1,7 +1,6 @@
 all:: $(OUTDIR)/libstartup.a
 
 $(OUTDIR)/libstartup.a: $(OUTDIR)/sysinit.o $(OUTDIR)/crt0.o $(OUTDIR)/blinky.o
-	echo $(OUTDIR) > outdir.txt
 	arm-none-eabi-ar rvs $@ $(OUTDIR)/sysinit.o $(OUTDIR)/crt0.o $(OUTDIR)/blinky.o
 
 $(OUTDIR)/sysinit.o: sysinit.c
