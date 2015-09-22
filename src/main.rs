@@ -1,17 +1,25 @@
 #![feature(no_std)]
-#![feature(no_std,core,lang_items,start)]
+#![feature(no_std,lang_items,start)]
 #![no_std]
 #![no_main]    
 
-#[macro_use]
-extern crate core;
 use core::fmt;
 
-// STUBs for linking. Exception handling is probably broken here.
-#[lang="stack_exhausted"] extern fn stack_exhausted() { loop {} }
-#[lang="eh_personality"] extern fn eh_personality() {}
-#[lang="panic_fmt"] #[no_mangle] pub extern fn rust_begin_unwind(msg: fmt::Arguments,
-                                                                 file: &'static str, line: u32) -> ! { loop {} }
+// STUBs for linking. Panicing definitely doesn't actually work here -
+// we just hang when we find a problem.  For hardware with a watchdog,
+// this is actually reasonable - the watchdog will eventually do the
+// right thing.
+#[lang="stack_exhausted"]
+extern fn stack_exhausted() { loop {} }
+#[lang="eh_personality"]
+extern fn eh_personality() {}
+#[lang="panic_fmt"]
+#[no_mangle]
+pub extern fn rust_begin_unwind(_msg: fmt::Arguments,
+                                _file: &'static str,
+                                _line: u32) -> ! {
+    loop {}
+}
 
 extern {
     pub fn blinky() -> ();
@@ -19,7 +27,9 @@ extern {
 
 #[no_mangle]
 pub extern fn main() {
-    panic!();
+    unsafe {
+        blinky();
+    }
 }
 
 // STUB for linking. Exception handling is DEFINITELY broken here.
