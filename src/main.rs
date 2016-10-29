@@ -28,15 +28,15 @@ extern {
 fn main() {
     unsafe {
         let port = Port::port(PortName::C);
-        port.set_pcr_mux(5, 1);
+        port.pcr[5 as usize] = 1 << 0x08;
         let gpio = Gpio::port(PortName::C);
-        gpio.set_pddr(1<<5);
+        gpio.pddr = 1 << 5;
         loop {
             for _ in 0..100000 {
-                gpio.set_psor(1<<5);
+                gpio.psor = 1 << 5;
             }
             for _ in 0..100000 {
-                gpio.set_pcor(1<<5);
+                gpio.pcor = 1 << 5;
             }
         }
     }
