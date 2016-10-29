@@ -29,32 +29,6 @@ int32_t			periph_clk_khz;
 
 extern void main();
 
-/*
- *  start()      initial entry point from the C run-time routine (crt0.s)
- *
- *  This is the entry point following reset and low-level initialzation.
- *  This routine is responsible for system initialization and for
- *  invoking main().
- *
- *  In the original Freescale Code Warrior example code, this routine
- *  lived in start.c.  I've moved it here so that a custom Teensy 3.1
- *  project can consist of just three files; crt0.s, the main project
- *  file, and this file.   8 Apr 14  KEL
- */
-void start(void)
-{
-/*
- * Enable all of the port clocks. These have to be enabled to configure
- * pin muxing options, so most code will need all of these on anyway.
- */
-	sysinit();			// Perform processor initialization
-	main();				// run the main program
-
-	while (1)   ;		// control should never get here!
-}
-
-
-
 /********************************************************************/
 void sysinit (void)
 {

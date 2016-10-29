@@ -1,29 +1,30 @@
 # cargo/teensy minimal project
 
-This is a simple project to blink the LED on a teensy using
-Rust. Right now the Rust code just calls back out to C for the actual
-blinking implementation. Porting all that code to Rust is the next
-step.
+This is a simple project to blink the LED on a teensy using Rust. It
+still uses C for early initialization and clock setup, but configures
+the output port and blinks the LED directly in Rust.
 
-The runtime isn't full-featured yet. Noticably missing is the mem*
-functions, and malloc/free. Implementing those will allow us to link
-libgcc for proper unwinding. Unwinding is questionable in an embedded
-environment, though, so handling errors by locking up and letting a
-hardawre watchdog solve the problem is my current plan :)
 
-An advantage of unwinding is the ability to potentially log to a
-serial device after the panic.
+## Toolchain setup
 
-## Note
+This currently requires nightly rust, for a number of reasons. The
+best way to get nightly rust is to use `rustup` to install it:
 
-This currently requires nightly rust. The build script for the libcore
-crate I'm using doesn't know how to handle stable releases. I don't
-know if there are other issues with unstable features used by the
-stack.
+    rustup toolchain install nightly
+
+You will then want to configure rustup to use nightly for this project:
+
+    cd /path/to/rust-teensy-test; rustup override set nightly
+
+You'll also need the `rust-src` component so that certain core Rust libraries can be rebuilt, and the `xargo` binary that automatically builds them for us:
+
+    rustup component add rust-src
+    cargo install xargo
 
 ## Building
 
-Just run `make`! Sometimes errors can be opaque, I'm still getting
-stderr propagation through the whole build stack sane.
+Just run `make`! Sometimes errors from the underlying c bits can be
+opaque, I'm still getting stderr propagation through the whole build
+stack
 
 To flash the program to a Teensy, run `make flash`.

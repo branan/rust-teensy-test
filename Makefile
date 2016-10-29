@@ -11,8 +11,8 @@ $(HEX): $(ELF)
 
 .PHONY: $(ELF)
 $(ELF): 
-	cargo build --target $(TARGET)
+	~/.cargo/bin/xargo build --target $(TARGET)
 
 flash: $(HEX)
 	@echo "Reset your Teensy now!"
-	teensy-loader-cli -w --mcu=mk20dx256 $(HEX)
+	teensy-loader-cli -w -mmcu=mk20dx128 $(HEX) -v
