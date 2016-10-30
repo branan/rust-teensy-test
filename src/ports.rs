@@ -20,15 +20,14 @@ pub struct Port {
 }
 
 impl Port {
-    pub unsafe fn port(name: PortName) -> &'static mut Port {
-        let ptr = match name {
+    pub unsafe fn port(name: PortName) -> *mut Port {
+        match name {
             PortName::A => 0x40049000 as *mut Port,
             PortName::B => 0x4004A000 as *mut Port,
             PortName::C => 0x4004B000 as *mut Port,
             PortName::D => 0x4004C000 as *mut Port,
             PortName::E => 0x4004D000 as *mut Port
-        };
-        &mut *ptr
+        }
     }
 }
 
@@ -43,14 +42,13 @@ pub struct Gpio {
 }
 
 impl Gpio {
-    pub unsafe fn port(name:PortName) -> &'static mut Gpio {
-        let ptr = match name {
+    pub unsafe fn port(name:PortName) -> *mut Gpio {
+        match name {
             PortName::A => 0x400FF000 as *mut Gpio,
             PortName::B => 0x400FF040 as *mut Gpio,
             PortName::C => 0x400FF080 as *mut Gpio,
             PortName::D => 0x400FF0C0 as *mut Gpio,
             PortName::E => 0x400FF100 as *mut Gpio
-        };
-        &mut *ptr
+        }
     }
 }

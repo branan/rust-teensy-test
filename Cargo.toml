@@ -3,3 +3,9 @@ name = "test"
 version = "0.1.0"
 authors = ["Branan Riley <branan@puppetlabs.com>"]
 build = "build.rs"
+
+[profile.release]
+panic = "abort"
+
+[profile.dev]
+panic = "abort"

@@ -1,4 +1,4 @@
-#![feature(lang_items,start)]
+#![feature(lang_items,start,core_intrinsics)]
 #![no_std]
 #![no_main]    
 
@@ -7,36 +7,23 @@ use core::fmt;
 mod ports;
 use ports::*;
 
-// STUBs for linking. Panicing definitely doesn't actually work here -
-// we just hang when we find a problem.  For hardware with a watchdog,
-// this is actually reasonable - the watchdog will eventually do the
-// right thing.
-#[lang="eh_personality"]
-extern fn eh_personality() {}
-#[lang="panic_fmt"]
-#[no_mangle]
-pub extern fn rust_begin_unwind(_msg: fmt::Arguments,
-                                _file: &'static str,
-                                _line: u32) -> ! {
-    loop {}
-}
-
 extern {
     pub fn sysinit() -> ();
+    pub fn Watchdog_IRQHandler() -> !;
 }
 
 fn main() {
     unsafe {
         let port = Port::port(PortName::C);
-        port.pcr[5 as usize] = 1 << 0x08;
+        core::intrinsics::volatile_store(&mut (*port).pcr[5 as usize], 1 << 8);
         let gpio = Gpio::port(PortName::C);
-        gpio.pddr = 1 << 5;
+        core::intrinsics::volatile_store(&mut (*gpio).pddr, 1<<5);
         loop {
-            for _ in 0..100000 {
-                gpio.psor = 1 << 5;
+            for _ in 0..10000000 {
+                core::intrinsics::volatile_store(&mut (*gpio).psor, 1<<5);
             }
-            for _ in 0..100000 {
-                gpio.pcor = 1 << 5;
+            for _ in 0..10000000 {
+                core::intrinsics::volatile_store(&mut (*gpio).pcor, 1<<5);
             }
         }
     }
@@ -51,8 +38,25 @@ pub extern fn start() {
     panic!("Control left main()");
 }
 
-// STUB for linking. Exception handling is DEFINITELY broken here.
-// We should be linking in libgcc, but that requires implementing some more
-// memory menagement functions first.
+// These functions and traits are used by the compiler, but are not
+// clearly useful for embedded (would you really want an unwinder?)
+// Right now a panic will cause the device to hang, which will end up
+// eventually tripping up a hardware watchdog if you have it set.
+//
+// Possibly in the future we could implement a panic that uses the
+// serial port to send panic information back to a host computer.
+
+#[lang = "eh_personality"]
+#[no_mangle]
+pub extern fn eh_personality() {}
+
+#[lang = "panic_fmt"]
+#[no_mangle]
+pub extern fn rust_begin_panic(_msg: core::fmt::Arguments,
+                               _file: &'static str,
+                               _line: u32) -> ! {
+    loop {};
+}
+
 #[no_mangle]
 pub extern fn __aeabi_unwind_cpp_pr0() {}
