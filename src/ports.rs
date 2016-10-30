@@ -1,3 +1,6 @@
+use core;
+use core::intrinsics;
+
 pub enum PortName {
     A,
     B,
@@ -8,20 +11,20 @@ pub enum PortName {
 
 #[repr(C,packed)]
 pub struct Port {
-    pub pcr: [u32; 32],
-    pub gplcr: u32,
-    pub gpchr: u32,
+    pcr: [u32; 32],
+    gplcr: u32,
+    gpchr: u32,
     reserved_0: [u8; 24],
-    pub isfr: u32,
+    isfr: u32,
     reserved_1: [u8; 28],
-    pub dfer: u32,
-    pub dfcr: u32,
-    pub dfwr: u32
+    dfer: u32,
+    dfcr: u32,
+    dfwr: u32
 }
 
 impl Port {
-    pub unsafe fn port(name: PortName) -> *mut Port {
-        match name {
+    pub unsafe fn reg(name: PortName) -> &'static mut Port {
+        &mut * match name {
             PortName::A => 0x40049000 as *mut Port,
             PortName::B => 0x4004A000 as *mut Port,
             PortName::C => 0x4004B000 as *mut Port,
@@ -29,26 +32,42 @@ impl Port {
             PortName::E => 0x4004D000 as *mut Port
         }
     }
+
+    pub unsafe fn set_pcr(&mut self, pin: u8, val: u32) {
+        core::intrinsics::volatile_store(&mut self.pcr[pin as usize], val);
+    }
 }
 
 #[repr(C,packed)]
 pub struct Gpio {
-    pub pdor: u32,
-    pub psor: u32,
-    pub pcor: u32,
-    pub ptor: u32,
-    pub pdir: u32,
-    pub pddr: u32
+    pdor: u32,
+    psor: u32,
+    pcor: u32,
+    ptor: u32,
+    pdir: u32,
+    pddr: u32
 }
 
 impl Gpio {
-    pub unsafe fn port(name:PortName) -> *mut Gpio {
-        match name {
+    pub unsafe fn reg(name:PortName) -> &'static mut Gpio {
+        &mut * match name {
             PortName::A => 0x400FF000 as *mut Gpio,
             PortName::B => 0x400FF040 as *mut Gpio,
             PortName::C => 0x400FF080 as *mut Gpio,
             PortName::D => 0x400FF0C0 as *mut Gpio,
             PortName::E => 0x400FF100 as *mut Gpio
         }
+    }
+
+    pub unsafe fn set_pddr(&mut self, val: u32) {
+        core::intrinsics::volatile_store(&mut self.pddr, val);
+    }
+
+    pub unsafe fn set_psor(&mut self, val: u32) {
+        core::intrinsics::volatile_store(&mut self.psor, val);
+    }
+
+    pub unsafe fn set_pcor(&mut self, val: u32) {
+        core::intrinsics::volatile_store(&mut self.pcor, val);
     }
 }

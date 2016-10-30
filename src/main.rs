@@ -9,21 +9,20 @@ use ports::*;
 
 extern {
     pub fn sysinit() -> ();
-    pub fn Watchdog_IRQHandler() -> !;
 }
 
 fn main() {
     unsafe {
-        let port = Port::port(PortName::C);
-        core::intrinsics::volatile_store(&mut (*port).pcr[5 as usize], 1 << 8);
-        let gpio = Gpio::port(PortName::C);
-        core::intrinsics::volatile_store(&mut (*gpio).pddr, 1<<5);
+        let port = Port::reg(PortName::C);
+        port.set_pcr(5, 1<<8);
+        let gpio = Gpio::reg(PortName::C);
+        gpio.set_pddr(1<<5);
         loop {
-            for _ in 0..10000000 {
-                core::intrinsics::volatile_store(&mut (*gpio).psor, 1<<5);
+            for _ in 0..100000 {
+                gpio.set_psor(1<<5);
             }
-            for _ in 0..10000000 {
-                core::intrinsics::volatile_store(&mut (*gpio).pcor, 1<<5);
+            for _ in 0..100000 {
+                gpio.set_pcor(1<<5);
             }
         }
     }
