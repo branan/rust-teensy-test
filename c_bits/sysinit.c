@@ -319,28 +319,3 @@ int32_t  pll_init(int8_t  prdiv_val, int8_t  vdiv_val)
  */
 	return ((crystal_val / prdiv) * vdiv); //MCGOUT equals PLL output frequency
 } // pll_init
-
-
-
-/********************************************************************
- *
- *  Watchdog timer disable routine
- *
- *  This routine was modified from the original in a Freescale Code
- *  Warrior example set.  The original code was contained in a source
- *  file named wdog.c.  That code disabled interrupts prior to unlocking
- *  the watchdog.  Unfortunately, that code also blindly reenabled
- *  interrupts without regard to their state prior to entry.
- *
- *  This code assumes that the calling routine will disable interrupts
- *  prior to the call, if necessary.  8 Apr 14   KEL
- *
- * Parameters:  none
- *
- */
-void wdog_disable(void)
-{
-	WDOG_UNLOCK = 0xC520;			// Write 0xC520 to the unlock register
-	WDOG_UNLOCK = 0xD928;			// Followed by 0xD928 to complete the unlock
-	WDOG_STCTRLH &= ~WDOG_STCTRLH_WDOGEN_MASK;	// Clear the WDOGEN bit to disable the watchdog
-}

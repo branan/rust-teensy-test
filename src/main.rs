@@ -6,6 +6,8 @@ use core::fmt;
 
 mod ports;
 use ports::*;
+mod watchdog;
+use watchdog::*;
 
 extern {
     pub fn sysinit() -> ();
@@ -18,10 +20,10 @@ fn main() {
         let gpio = Gpio::reg(PortName::C);
         gpio.set_pddr(1<<5);
         loop {
-            for _ in 0..100000 {
+            for _ in 0..10000000 {
                 gpio.set_psor(1<<5);
             }
-            for _ in 0..100000 {
+            for _ in 0..10000000 {
                 gpio.set_pcor(1<<5);
             }
         }
@@ -35,6 +37,13 @@ pub extern fn start() {
     }
     main();
     panic!("Control left main()");
+}
+
+#[no_mangle]
+pub extern fn wdog_disable() {
+    unsafe {
+        Wdog::reg().disable();
+    }
 }
 
 // These functions and traits are used by the compiler, but are not

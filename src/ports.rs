@@ -1,5 +1,4 @@
 use core;
-use core::intrinsics;
 
 pub enum PortName {
     A,
